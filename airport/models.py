@@ -9,6 +9,9 @@ class Crew(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+    class Meta:
+        ordering = ("last_name",)
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -38,6 +41,9 @@ class Airplane(models.Model):
             f"Airplane Type: {self.airplane_type}"
         )
 
+    class Meta:
+        ordering = ("airplane_type", "rows", "seats_in_row")
+
 
 class Airport(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -45,6 +51,9 @@ class Airport(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ("name", )
 
 
 class Route(models.Model):
@@ -81,4 +90,4 @@ class Flight(models.Model):
         )
 
     class Meta:
-        ordering = ("departure_time", "arrival_time",)
+        ordering = ("-departure_time", "-arrival_time",)
