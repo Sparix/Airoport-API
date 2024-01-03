@@ -11,7 +11,8 @@ from airport.models import (
     Flight,
     Ticket,
     Order,
-    City, Country
+    City,
+    Country
 )
 
 
@@ -38,6 +39,26 @@ class AirplaneSerializer(serializers.ModelSerializer):
             "capacity",
             "airplane_type",
         )
+
+
+class AirplaneDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airplane
+        fields = (
+            "id",
+            "name",
+            "rows",
+            "seats_in_row",
+            "capacity",
+            "airplane_type",
+            "image",
+        )
+
+
+class AirplaneImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airplane
+        fields = ("id", "image")
 
 
 class AirplaneListSerializer(AirplaneSerializer):
