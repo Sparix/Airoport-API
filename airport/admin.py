@@ -6,7 +6,11 @@ from airport.models import (
     Airplane,
     Airport,
     Route,
-    Flight
+    Flight,
+    Order,
+    Ticket,
+    Country,
+    City
 )
 
 
@@ -41,4 +45,24 @@ class RouteAdmin(admin.ModelAdmin):
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
     list_display = ("route", "airplane", "departure_time", "arrival_time",)
-    filter_fields = ("route", "airplane", )
+    filter_fields = ("route", "airplane",)
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ("row", "seat", "flight")
+
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display = ("name", "country")
