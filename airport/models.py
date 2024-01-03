@@ -14,6 +14,21 @@ class Crew(models.Model):
         ordering = ("last_name",)
 
 
+class Country(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class City(models.Model):
+    name = models.CharField(max_length=100)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"City: {self.name}, Country: {self.country.name}"
+
+
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -48,7 +63,7 @@ class Airplane(models.Model):
 
 class Airport(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    closest_big_city = models.CharField(max_length=255)
+    closest_big_city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
@@ -78,15 +93,23 @@ class Route(models.Model):
 
 
 class Flight(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="route_flights")
-    airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name="airplane_flights")
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        related_name="route_flights"
+    )
+    airplane = models.ForeignKey(
+        Airplane,
+        on_delete=models.CASCADE,
+        related_name="airplane_flights"
+    )
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     crew = models.ManyToManyField(Crew, blank=True)
 
     def __str__(self):
         return (
-            f"Source: {self.route.source.name}"
+            f"Source: {self.route.source.name} "
             f"Destination: {self.route.destination.name}"
         )
 
@@ -151,5 +174,5 @@ class Ticket(models.Model):
         )
 
     class Meta:
-        unique_together = ("row", "seat", "flight", )
-        ordering = ("row", "seat", )
+        unique_together = ("row", "seat", "flight",)
+        ordering = ("row", "seat",)
