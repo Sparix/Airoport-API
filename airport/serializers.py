@@ -9,7 +9,9 @@ from airport.models import (
     Airport,
     Route,
     Flight,
-    Ticket, Order
+    Ticket,
+    Order,
+    City, Country
 )
 
 
@@ -42,10 +44,30 @@ class AirplaneListSerializer(AirplaneSerializer):
     airplane_type = AirplaneTypeSerializer(read_only=True)
 
 
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ("id", "name")
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ("id", "name", "country")
+
+
+class CityListSerializer(CitySerializer):
+    country = serializers.CharField(source="country.name", read_only=True)
+
+
 class AirportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
         fields = ("id", "name", "closest_big_city",)
+
+
+class AirportListSerializer(AirportSerializer):
+    closest_big_city = CityListSerializer(read_only=True)
 
 
 class RouteSerializer(serializers.ModelSerializer):
@@ -55,8 +77,8 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(RouteSerializer):
-    source = AirportSerializer(read_only=True)
-    destination = AirportSerializer(read_only=True)
+    source = AirportListSerializer(read_only=True)
+    destination = AirportListSerializer(read_only=True)
 
 
 class FlightSerializer(serializers.ModelSerializer):
@@ -69,8 +91,12 @@ class FlightListSerializer(FlightSerializer):
     route = RouteListSerializer(read_only=True)
     airplane = AirplaneListSerializer(read_only=True)
     crew = CrewSerializer(many=True)
-    departure_time = serializers.DateTimeField("%d-%h-%Y %H-%M")
-    arrival_time = serializers.DateTimeField("%d-%h-%Y %H-%M")
+    departure_time = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", read_only=True
+    )
+    arrival_time = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", read_only=True
+    )
 
 
 class TicketSerializer(serializers.ModelSerializer):
