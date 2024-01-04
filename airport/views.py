@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db.models import F, Count
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from airport.models import (
@@ -108,11 +109,18 @@ def params_to_ints(queryset: str) -> list:
     return [int(str_id) for str_id in queryset.split(",")]
 
 
+class PaginationClass(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.select_related(
         "source__closest_big_city__country", "destination__closest_big_city__country"
     )
     serializer_class = RouteSerializer
+    pagination_class = PaginationClass
 
     def get_queryset(self):
         queryset = self.queryset
@@ -145,6 +153,7 @@ class FlightViewSet(viewsets.ModelViewSet):
         "airplane__airplane_type",
     ).prefetch_related("crew")
     serializer_class = FlightSerializer
+    pagination_class = PaginationClass
 
     def get_queryset(self):
         queryset = self.queryset
@@ -183,6 +192,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         "tickets__flight__crew"
     )
     serializer_class = OrderSerializer
+    pagination_class = PaginationClass
 
     def get_queryset(self):
         queryset = self.queryset
