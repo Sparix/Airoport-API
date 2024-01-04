@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import F, Count
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -87,11 +89,32 @@ class AirportViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
 
+def params_to_ints(queryset: str) -> list:
+    """convert a list of string ids to a list of integer"""
+    return [int(str_id) for str_id in queryset.split(",")]
+
+
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.select_related(
         "source__closest_big_city__country", "destination__closest_big_city__country"
     )
     serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+
+        if source:
+            source_ids = params_to_ints(source)
+            queryset = queryset.filter(source__id__in=source_ids)
+
+        if destination:
+            destination_ids = params_to_ints(destination)
+            queryset = queryset.filter(destination__id__in=destination_ids)
+
+        return queryset
 
     def get_serializer_class(self):
         serializer = self.serializer_class
@@ -102,17 +125,29 @@ class RouteViewSet(viewsets.ModelViewSet):
 
 
 class FlightViewSet(viewsets.ModelViewSet):
-    queryset = Flight.objects.all()
+    queryset = Flight.objects.select_related(
+        "route__source__closest_big_city__country",
+        "route__destination__closest_big_city__country",
+        "airplane__airplane_type",
+    ).prefetch_related("crew")
     serializer_class = FlightSerializer
 
     def get_queryset(self):
         queryset = self.queryset
+
+        route = self.request.query_params.get("route")
+        departure_time = self.request.query_params.get("departure_time")
+
+        if route:
+            route_ids = params_to_ints(route)
+            queryset = queryset.filter(route__id__in=route_ids)
+
+        if departure_time:
+            departure_time = datetime.strptime(departure_time, "%Y-%m-%d").date()
+            queryset = queryset.filter(departure_time__date=departure_time)
+
         if self.action in ("list", "retrieve"):
-            return queryset.select_related(
-                "route__source__closest_big_city__country",
-                "route__destination__closest_big_city__country",
-                "airplane__airplane_type",
-            ).prefetch_related("crew").annotate(
+            queryset = queryset.annotate(
                 free_tickets_seat=F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
             )
         return queryset
