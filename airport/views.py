@@ -25,7 +25,6 @@ from airport.serializers import (
     FlightSerializer,
     AirplaneListSerializer,
     RouteListSerializer,
-    FlightListSerializer,
     OrderSerializer,
     OrderListSerializer,
     AirportListSerializer,
@@ -33,7 +32,8 @@ from airport.serializers import (
     CitySerializer,
     CityListSerializer,
     AirplaneImageSerializer,
-    AirplaneDetailSerializer
+    AirplaneDetailSerializer,
+    FlightListDetailSerializer
 )
 
 
@@ -170,7 +170,7 @@ class FlightViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class
 
         if self.action in ("list", "retrieve"):
-            return FlightListSerializer
+            return FlightListDetailSerializer
 
         return serializer
 
