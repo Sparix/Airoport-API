@@ -56,6 +56,7 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
 
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.select_related("airplane_type")
+    serializer_class = AirplaneSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
