@@ -82,6 +82,20 @@ class AirportViewSet(viewsets.ModelViewSet):
     )
     serializer_class = AirportSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+
+        airport_name = self.request.query_params.get("airport_name")
+        city = self.request.query_params.get("city")
+
+        if airport_name:
+            queryset = queryset.filter(name__icontains=airport_name)
+
+        if city:
+            queryset = queryset.filter(closest_big_city__name__icontains=city)
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
             return AirportListSerializer
