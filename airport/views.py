@@ -1,3 +1,4 @@
+from django.db.models import F, Count
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -28,7 +29,9 @@ from airport.serializers import (
     AirportListSerializer,
     CountrySerializer,
     CitySerializer,
-    CityListSerializer, AirplaneImageSerializer, AirplaneDetailSerializer
+    CityListSerializer,
+    AirplaneImageSerializer,
+    AirplaneDetailSerializer
 )
 
 
@@ -59,7 +62,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 
         return serializer
 
-    @action(methods=["POST"], detail=True, url_path="upload-image",)
+    @action(methods=["POST"], detail=True, url_path="upload-image", )
     def upload_image(self, request, pk=None):
         item = self.get_object()
         serializer = self.get_serializer(item, data=request.data)
@@ -99,12 +102,20 @@ class RouteViewSet(viewsets.ModelViewSet):
 
 
 class FlightViewSet(viewsets.ModelViewSet):
-    queryset = flights = Flight.objects.select_related(
-        "route__source__closest_big_city__country",
-        "route__destination__closest_big_city__country",
-        "airplane__airplane_type",
-    ).prefetch_related("crew")
+    queryset = Flight.objects.all()
     serializer_class = FlightSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        if self.action in ("list", "retrieve"):
+            return queryset.select_related(
+                "route__source__closest_big_city__country",
+                "route__destination__closest_big_city__country",
+                "airplane__airplane_type",
+            ).prefetch_related("crew").annotate(
+                free_tickets_seat=F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+            )
+        return queryset
 
     def get_serializer_class(self):
         serializer = self.serializer_class

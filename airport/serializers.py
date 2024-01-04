@@ -102,6 +102,22 @@ class RouteListSerializer(RouteSerializer):
     destination = AirportListSerializer(read_only=True)
 
 
+class TicketSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        data = super(TicketSerializer, self).validate(attrs)
+        Ticket.validate_ticket(
+            attrs["row"],
+            attrs["seat"],
+            attrs["flight"].airplane,
+            ValidationError
+        )
+        return data
+
+    class Meta:
+        model = Ticket
+        fields = ("id", "row", "seat", "flight",)
+
+
 class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
@@ -118,22 +134,19 @@ class FlightListSerializer(FlightSerializer):
     arrival_time = serializers.DateTimeField(
         format="%Y-%m-%d %H:%M:%S", read_only=True
     )
-
-
-class TicketSerializer(serializers.ModelSerializer):
-    def validate(self, attrs):
-        data = super(TicketSerializer, self).validate(attrs)
-        Ticket.validate_ticket(
-            attrs["row"],
-            attrs["seat"],
-            attrs["flight"].airplane,
-            ValidationError
-        )
-        return data
+    count_free_seats = serializers.IntegerField(source="free_tickets_seat")
 
     class Meta:
-        model = Ticket
-        fields = ("id", "row", "seat", "flight",)
+        model = Flight
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "count_free_seats"
+        )
 
 
 class TicketListSerializer(TicketSerializer):
