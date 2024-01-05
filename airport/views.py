@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import F, Count
+from django.db.models import F, Count, Prefetch
 from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
@@ -50,6 +50,7 @@ class CrewViewSet(viewsets.ModelViewSet):
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
+    serializer_class = AirplaneTypeSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminUser,)
 
@@ -105,7 +106,7 @@ class AirportViewSet(viewsets.ModelViewSet):
         if city:
             queryset = queryset.filter(closest_big_city__name__icontains=city)
 
-        return queryset
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
@@ -127,7 +128,8 @@ class PaginationClass(PageNumberPagination):
 
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.select_related(
-        "source__closest_big_city__country", "destination__closest_big_city__country"
+        "source__closest_big_city__country",
+        "destination__closest_big_city__country",
     )
     serializer_class = RouteSerializer
     pagination_class = PaginationClass
@@ -201,9 +203,9 @@ class FlightViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related(
         "tickets__flight__route__source__closest_big_city__country",
-        "tickets__flight__route__destination__closest_big_city__country",
-        "tickets__flight__airplane__airplane_type",
-        "tickets__flight__crew"
+        "tickets__flight__crew",
+        "tickets__flight__airplane__airplane_type"
+
     )
     serializer_class = OrderSerializer
     pagination_class = PaginationClass
@@ -212,11 +214,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        queryset = queryset.filter(user=self.request.user)
+        queryset = queryset.filter(user=self.request.user).distinct()
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "retrieve"):
             return OrderListSerializer
 
         return OrderSerializer
