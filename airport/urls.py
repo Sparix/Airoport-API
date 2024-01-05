@@ -13,7 +13,7 @@ from airport.views import (
     CityViewSet,
 )
 
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 router.register("crews", CrewViewSet)
 router.register("airplane_types", AirplaneTypeViewSet)
 router.register("airplanes", AirplaneViewSet)
