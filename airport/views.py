@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from django.db.models import F, Count, Prefetch
+from django.db.models import F, Count
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -38,28 +37,25 @@ from airport.serializers import (
     CityListSerializer,
     AirplaneImageSerializer,
     AirplaneDetailSerializer,
-    FlightListDetailSerializer
+    FlightListDetailSerializer,
 )
 
 
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminUser,)
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.select_related("airplane_type")
     serializer_class = AirplaneSerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
@@ -92,7 +88,6 @@ class AirportViewSet(viewsets.ModelViewSet):
         "closest_big_city__country",
     )
     serializer_class = AirportSerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
@@ -152,7 +147,6 @@ class RouteViewSet(viewsets.ModelViewSet):
     )
     serializer_class = RouteSerializer
     pagination_class = PaginationClass
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
@@ -205,7 +199,6 @@ class FlightViewSet(viewsets.ModelViewSet):
     ).prefetch_related("crew")
     serializer_class = FlightSerializer
     pagination_class = PaginationClass
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
@@ -267,7 +260,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     serializer_class = OrderSerializer
     pagination_class = PaginationClass
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -288,14 +280,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminUser,)
 
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.select_related("country")
     serializer_class = CitySerializer
-    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminUser,)
 
     def get_serializer_class(self):
