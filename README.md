@@ -54,7 +54,12 @@ python maange.py makemigrations
 python manage.py migrate
 ```
 
-2. Start the development server:
+2. Load data to db:
+```shell
+python manage.py loaddata data_base.json
+```
+
+3. Start the development server:
 ```shell
 python manage.py runserver
 ```
