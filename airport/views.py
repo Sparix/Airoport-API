@@ -254,6 +254,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related(
         "tickets__flight__route__source__closest_big_city__country",
+        "tickets__flight__route__destination__closest_big_city__country",
         "tickets__flight__crew",
         "tickets__flight__airplane__airplane_type"
 
