@@ -4,23 +4,28 @@ from chat_msg.models import ChatSupport, ChatMessage
 from user.serializers import UserSerializer
 
 
-class ChatSupportSerializerBase(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(
-        format="%Y-%m-%d %H:%M:%S", read_only=True
-    )
-    author_created = UserSerializer(read_only=True)
+class ChatSupportConnectChatSerializer(serializers.ModelSerializer):
     user_list = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = ChatSupport
-        fields = (
+        fields = ("user_list",)
+
+
+class ChatSupportSerializerBase(ChatSupportConnectChatSerializer):
+    created_at = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", read_only=True
+    )
+    author_created = UserSerializer(read_only=True)
+
+    class Meta(ChatSupportConnectChatSerializer.Meta):
+        fields = ChatSupportConnectChatSerializer.Meta.fields + (
             "id",
             "chat_support_group",
             "enabled",
             "created_at",
             "author_created",
             "is_support",
-            "user_list",
         )
 
 
