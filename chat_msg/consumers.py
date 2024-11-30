@@ -17,6 +17,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         self.chatroom = await self.get_chatroom(self.chatroom_id)
 
+        if not await self.is_user_in_chatroom(self.user, self.chatroom):
+            await self.close()
+            return
+
         await self.channel_layer.group_add(
             str(self.chatroom_id), self.channel_name
         )
@@ -61,6 +65,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_message_data(self, message):
         return ChatMessageSerializerBase(message).data
+
+    @database_sync_to_async
+    def is_user_in_chatroom(self, user, chatroom):
+        return user in chatroom.user_list.all()
 
     async def chat_message(self, event):
         message = await self.get_message(event['message_id'])
