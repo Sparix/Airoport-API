@@ -29,6 +29,7 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
     path("api/airport/", include("airport.urls", namespace="airport")),
     path("api/user/", include("user.urls", namespace="user")),
+    path("api/support/", include("chat_msg.urls", namespace="user")),
 
     path(
         "api/doc/",

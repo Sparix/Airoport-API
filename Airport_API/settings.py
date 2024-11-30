@@ -36,6 +36,7 @@ INTERNAL_IPS = [
 ]
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "airport",
     "user",
+    "chat_msg",
 ]
 
 MIDDLEWARE = [
@@ -79,7 +81,24 @@ TEMPLATES = [
 
 ROOT_URLCONF = "Airport_API.urls"
 
-WSGI_APPLICATION = "Airport_API.wsgi.application"
+# WSGI_APPLICATION = "Airport_API.wsgi.application"
+
+ASGI_APPLICATION = 'Airport_API.asgi.application'
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     }
+# }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get("REDIS_URL"))],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
